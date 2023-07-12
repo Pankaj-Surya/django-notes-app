@@ -1,34 +1,35 @@
-pipeline {
-    agent any 
+pipeline{
+    agent any
     
-    stages{
-        stage("Clone Code"){
-            steps {
-                echo "Cloning the code"
-                git url:"https://github.com/LondheShubham153/django-notes-app.git", branch: "main"
-            }
+    stages {
+        stage("Code"){
+           steps{
+               echo "Cloing the code"
+               git url: "https://github.com/Pankaj-Surya/django-notes-app.git", branch: "main"
+           } 
         }
         stage("Build"){
-            steps {
-                echo "Building the image"
+            steps{
+                echo "Building code"
                 sh "docker build -t my-note-app ."
             }
         }
-        stage("Push to Docker Hub"){
-            steps {
-                echo "Pushing the image to docker hub"
-                withCredentials([usernamePassword(credentialsId:"dockerHub",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]){
-                sh "docker tag my-note-app ${env.dockerHubUser}/my-note-app:latest"
-                sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
-                sh "docker push ${env.dockerHubUser}/my-note-app:latest"
+        stage("Push to Dockerhub"){
+            steps{
+                echo "Push to DockerHub"
+                withCredentials([usernamePassword(credentialsId: 'dockerHub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                // Code or steps that require the credentials
+                sh "docker tag my-note-app ${env.USERNAME}/my-note-app:latest"
+                sh "docker login -u ${env.USERNAME} -p ${env.PASSWORD}"
+                sh "docker push ${env.USERNAME}/my-note-app:latest"
                 }
+                
             }
         }
-        stage("Deploy"){
-            steps {
-                echo "Deploying the container"
+        stage("Deploying the Container"){
+            steps{
+                echo "Deploy"
                 sh "docker-compose down && docker-compose up -d"
-                
             }
         }
     }
